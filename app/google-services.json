@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "381233203541",
+    "firebase_url": "https://beeraid-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "beeraid",
+    "storage_bucket": "beeraid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381233203541:android:04412f99109d0e788dc7dc",
+        "android_client_info": {
+          "package_name": "com.example.beeraid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "381233203541-bhblaiffeqipqf8hkdepchhi2nlqhsh2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwirc9h70fgsPPRtcwTF0T8mXrCgP5dDY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "381233203541-bhblaiffeqipqf8hkdepchhi2nlqhsh2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
