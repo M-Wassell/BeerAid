@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,7 +29,7 @@ import java.util.Map;
 public class Register extends AppCompatActivity {
 
     public static final String TAG = "TAG";
-    EditText mFullName,mEmail,mPassword;
+    EditText mFullName,mEmail,mPassword,mTextConfPassword;
     Button mRegisterBtn;
     TextView mLoginBtn;
     FirebaseAuth fAuth;
@@ -42,15 +43,16 @@ public class Register extends AppCompatActivity {
 
         mFullName    = findViewById(R.id.fullName);
         mEmail       = findViewById(R.id.Email);
-        mPassword    = findViewById(R.id.Password);
+        mPassword    = findViewById(R.id.password);
         mRegisterBtn = findViewById(R.id.registerBtn);
         mLoginBtn    = findViewById(R.id.createText);
+        mTextConfPassword = findViewById(R.id.textConfPassword);
 
         fAuth       = FirebaseAuth.getInstance();
         fStore      = FirebaseFirestore.getInstance();
         progressBar = findViewById(R.id.progressBar);
 
-
+        //validateEmailAddress(mEmail);
 
         if(fAuth.getCurrentUser() !=null)
         {
@@ -58,28 +60,42 @@ public class Register extends AppCompatActivity {
             finish();
         }
 
+
+
+
         mRegisterBtn.setOnClickListener(v -> {
                 String email = mEmail.getText().toString().trim();
                 String password = mPassword.getText().toString().trim();
                 String fullName = mFullName.getText().toString();
+                String confirmPassword = mTextConfPassword.getText().toString();
 
 
-                if(TextUtils.isEmpty(email))
-                {
+
+                if(fullName.isEmpty()){
+                    mFullName.setError("Full Name is Required");
+                    return;
+                }
+//                if(!email.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+//                Toast.makeText(this, "Email is Valid", Toast.LENGTH_SHORT).show();
+//                return;
+//                }
+                if(TextUtils.isEmpty(email) && !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                     mEmail.setError("Email is Required");
                     return;
                 }
-                if(TextUtils.isEmpty(password))
-                {
+                if(TextUtils.isEmpty(password)) {
                     mPassword.setError("Password is Required");
                     return;
                 }
-
-                if(password.length()<6)
-                {
+                if(password.length()<6) {
                     mPassword.setError("Password Must have at least 6 characters");
                     return;
                 }
+                if(!password.equals(confirmPassword)){
+                    mTextConfPassword.setError("Passwords Do Not Match");
+                    return;
+                }
+                 //data will be validated before this point
 
                 progressBar.setVisibility(View.VISIBLE);
 
@@ -111,7 +127,7 @@ public class Register extends AppCompatActivity {
                             user.put("fName", fullName);
                             user.put("email", email);
                             documentReference.set(user).addOnSuccessListener(aVoid -> {
-                                Log.d(TAG, "onSuccess: usre Profile is created for " + userID);
+                                Log.d(TAG, "onSuccess: user Profile is created for " + userID);
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e)
@@ -136,4 +152,7 @@ public class Register extends AppCompatActivity {
                 (new Intent(getApplicationContext(),Login.class)));
 
     }
+
+
+
 }

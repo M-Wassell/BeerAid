@@ -1,8 +1,6 @@
 package com.example.beeraid;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,24 +8,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
+
+import java.util.Objects;
 
 public class UserProfile extends AppCompatActivity {
     //private static final int GALLERY_INTENT_CODE = 1023;
@@ -54,7 +46,7 @@ public class UserProfile extends AppCompatActivity {
         email = findViewById(R.id.profileEmail);
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
-        userId = fAuth.getCurrentUser().getUid();
+        userId = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
         user = fAuth.getCurrentUser();
         restPassLocal = findViewById(R.id.resetPassLoc);
         changeProfileImage= (Button) findViewById(R.id.changeProfile);
@@ -71,21 +63,12 @@ public class UserProfile extends AppCompatActivity {
         storageReference = FirebaseStorage.getInstance().getReference();
 
         StorageReference profileRef = storageReference.child("users/" + fAuth.getCurrentUser().getUid() + "/profile.jpg");
-        profileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Picasso.get().load(uri).fit()
-                        .into(profileImage);
-            }
-        });
+        profileRef.getDownloadUrl().addOnSuccessListener(uri -> Picasso.get().load(uri).fit().into(profileImage));
 
         DocumentReference documentReference = fStore.collection("users").document(userId);
-        documentReference.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                email.setText(documentSnapshot.getString("email"));
-                fullName.setText(documentSnapshot.getString("fName"));
-            }
+        documentReference.addSnapshotListener(this, (documentSnapshot, e) -> {
+            email.setText(documentSnapshot.getString("email"));
+            fullName.setText(documentSnapshot.getString("fName"));
         });
 
         restPassLocal.setOnClickListener(view -> {
@@ -100,17 +83,7 @@ public class UserProfile extends AppCompatActivity {
             passwordRestDialog.setPositiveButton("Yes", (dialogInterface, i) -> {
                 //Extract email and send reset link
                 String newPassword = resetPassword.getText().toString();
-                user.updatePassword(newPassword).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(UserProfile.this, "Password Rest Successfully", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(UserProfile.this, "Password Rest Failed", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                user.updatePassword(newPassword).addOnSuccessListener(aVoid -> Toast.makeText(UserProfile.this, "Password Rest Successfully", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(UserProfile.this, "Password Rest Failed", Toast.LENGTH_SHORT).show());
             });
             passwordRestDialog.setNegativeButton("No", (dialogInterface, i) -> {
                 //close
@@ -121,8 +94,8 @@ public class UserProfile extends AppCompatActivity {
         changeProfileImage.setOnClickListener(view -> {
             //open gallery
             Intent i = new Intent(view.getContext(), EditProfile.class);
-            i.putExtra("fullName", "Isaac Michael Wassell");
-            i.putExtra("email", "issacmwassell15@gmail.com");
+            i.putExtra("fullName", fullName.getText().toString());
+            i.putExtra("email", email.getText().toString());
             startActivity(i);
 //                Intent openGalleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //                startActivityForResult(openGalleryIntent, 1000);
@@ -130,43 +103,8 @@ public class UserProfile extends AppCompatActivity {
 
         }
 
-        @Override
-        protected void onActivityResult ( int requestCode, int resultCode,
-        @androidx.annotation.Nullable Intent data){
-            super.onActivityResult(requestCode, resultCode, data);
+//11111
 
-            if (requestCode == 1000) {
-                if (resultCode == Activity.RESULT_OK) {
-                    Uri imageUri = data.getData();
-                    //enable below to debug
-                    //profileImage.setImageURI(imageUri);
 
-                    upLoadImageToFirebase(imageUri);
-
-                }
-            }
-
-        }
-
-        private void upLoadImageToFirebase (Uri imageUri){
-            //upload image to fire base
-            final StorageReference fileRef = storageReference.child("users/" + fAuth.getCurrentUser().getUid() + "/profile.jpg");
-            fileRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            Picasso.get().load(uri).into(profileImage);
-                        }
-                    });
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(UserProfile.this, "Failed", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
 
 }
