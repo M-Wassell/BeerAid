@@ -24,11 +24,13 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity
 {
+    public static TextView resulttextview;
+
     TextView verifyMsg;
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
     String userId;
-    Button resendCode,profileBtn;
+    Button resendCode,profileBtn, scan_btn, toast_btn;
     //ImageButton imageButton;
 
     @Override
@@ -36,19 +38,37 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        resulttextview = findViewById(R.id.barcodetextview);
+        scan_btn = findViewById(R.id.scanBtn);
+        toast_btn = findViewById(R.id.toastBtn);
+
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
         userId = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
         verifyMsg = findViewById(R.id.verifyMsg);
         resendCode = findViewById(R.id.resendCode);
         final FirebaseUser user = fAuth.getCurrentUser();
-        profileBtn = findViewById(R.id.profileBtn);
+        //profileBtn = findViewById(R.id.profileBtn);
         //imageButton = findViewById(R.id.profileBtn);
 
 //        imageButton.setOnClickListener(view -> {
 //            Intent intent = new Intent(this,UserProfile.class);
 //            startActivity(intent);
 //        });
+
+        scan_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(),ScanCodeActivity.class));
+            }
+        });
+
+        toast_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this,resulttextview.getText(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
 
         if(!user.isEmailVerified()) {
@@ -72,10 +92,10 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        profileBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(this, UserProfile.class);
-            startActivity(intent);
-        });
+//        profileBtn.setOnClickListener(view -> {
+//            Intent intent = new Intent(this, UserProfile.class);
+//            startActivity(intent);
+//        });
 
     }
     public void logout(View view)
